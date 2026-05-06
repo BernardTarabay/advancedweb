@@ -1,0 +1,77 @@
+<%- include('partials/header', {title: 'Supplier Details', user}) %>
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h2>Supplier Details</h2>
+        <div>
+            <a href="/suppliers" class="btn btn-primary">Back to Suppliers</a>
+            <% if (user.role === 'admin' || user.role === 'super admin') { %>
+                <a href="/suppliers/<%= supplier._id %>/edit" class="btn btn-success">Edit</a>
+            <% } %>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h3 style="margin-bottom: 1rem;">Supplier Information</h3>
+        <table style="box-shadow: none;">
+            <tr>
+                <th style="width: 200px;">Name</th>
+                <td><%= supplier.name %></td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td><%= supplier.email %></td>
+            </tr>
+            <tr>
+                <th>Phone</th>
+                <td><%= supplier.phone || 'N/A' %></td>
+            </tr>
+            <tr>
+                <th>Address</th>
+                <td><%= supplier.address || 'N/A' %></td>
+            </tr>
+            <tr>
+                <th>Created At</th>
+                <td><%= new Date(supplier.createdAt).toLocaleString() %></td>
+            </tr>
+            <tr>
+                <th>Updated At</th>
+                <td><%= new Date(supplier.updatedAt).toLocaleString() %></td>
+            </tr>
+        </table>
+    </div>
+    
+    <% if (supplier.products && supplier.products.length > 0) { %>
+        <div class="card">
+            <h3 style="margin-bottom: 1rem;">Products (<%= supplier.products.length %>)</h3>
+            <table style="box-shadow: none;">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% supplier.products.forEach(product => { %>
+                        <tr>
+                            <td><%= product.name %></td>
+                            <td>$<%= product.price.toFixed(2) %></td>
+                            <td><%= product.quantity %></td>
+                            <td>
+                                <a href="/products/<%= product._id %>" class="btn btn-primary">View</a>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    <% } else { %>
+        <div class="card">
+            <p>No products associated with this supplier.</p>
+        </div>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,52 @@
+<%- include('partials/header', {title: isEdit ? 'Edit Product' : 'New Product', user}) %>
+
+<div class="container">
+    <div class="card" style="max-width: 600px; margin: 2rem auto;">
+        <h2 style="margin-bottom: 1.5rem;"><%= isEdit ? 'Edit Product' : 'Create New Product' %></h2>
+        
+        <% if (locals.error) { %>
+            <div class="error"><%= error %></div>
+        <% } %>
+        
+        <form action="<%= isEdit ? '/products/' + product._id + '/update' : '/products/create' %>" method="POST">
+            <div class="form-group">
+                <label for="name">Product Name *</label>
+                <input type="text" id="name" name="name" value="<%= isEdit ? product.name : '' %>" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="4"><%= isEdit ? (product.description || '') : '' %></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="price">Price *</label>
+                <input type="number" id="price" name="price" step="0.01" value="<%= isEdit ? product.price : '' %>" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="quantity">Quantity</label>
+                <input type="number" id="quantity" name="quantity" value="<%= isEdit ? product.quantity : 0 %>">
+            </div>
+            
+            <div class="form-group">
+                <label for="supplier">Supplier *</label>
+                <select id="supplier" name="supplier" required>
+                    <option value="">Select a supplier</option>
+                    <% suppliers.forEach(supplier => { %>
+                        <option value="<%= supplier._id %>" <%= isEdit && product.supplier && product.supplier._id.toString() === supplier._id.toString() ? 'selected' : '' %>>
+                            <%= supplier.name %>
+                        </option>
+                    <% }); %>
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;"><%= isEdit ? 'Update' : 'Create' %></button>
+                <a href="/products" class="btn" style="flex: 1; text-align: center; background: #95a5a6; color: white;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

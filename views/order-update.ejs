@@ -1,0 +1,38 @@
+<%- include('partials/header', {title: 'Update Order', user}) %>
+
+<div class="container">
+    <div class="card" style="max-width: 600px; margin: 2rem auto;">
+        <h2 style="margin-bottom: 1.5rem;">Update Order Status</h2>
+        
+        <div style="background: #ecf0f1; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem;">
+            <p><strong>Order ID:</strong> #<%= order._id.toString().slice(-6) %></p>
+            <p><strong>Customer:</strong> <%= order.user ? order.user.name : 'N/A' %></p>
+            <p><strong>Total:</strong> $<%= order.totalAmount.toFixed(2) %></p>
+            <p><strong>Current Status:</strong> <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %></p>
+        </div>
+        
+        <% if (locals.error) { %>
+            <div class="error"><%= error %></div>
+        <% } %>
+        
+        <form action="/orders/<%= order._id %>/update" method="POST">
+            <div class="form-group">
+                <label for="status">New Status *</label>
+                <select id="status" name="status" required>
+                    <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                    <option value="processing" <%= order.status === 'processing' ? 'selected' : '' %>>Processing</option>
+                    <option value="shipped" <%= order.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+                    <option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+                    <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Update Status</button>
+                <a href="/orders/<%= order._id %>" class="btn" style="flex: 1; text-align: center; background: #95a5a6; color: white;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,102 @@
+<%- include('partials/header', {title: 'Admin Dashboard', user: user}) %>
+
+<div class="container">
+    <h1 style="margin-bottom: 2rem;">Admin Dashboard</h1>
+    
+    <% if (locals.success) { %>
+        <div class="success" style="margin-bottom: 1rem;"><%= success %></div>
+    <% } %>
+
+    <!-- Stats Overview -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div class="card" style="text-align: center; padding: 1.5rem;">
+            <h3 style="color: #3498db; margin: 0;">Total Users</h3>
+            <p style="font-size: 2rem; font-weight: bold; margin: 0.5rem 0 0 0;"><%= stats.totalUsers %></p>
+        </div>
+        <div class="card" style="text-align: center; padding: 1.5rem;">
+            <h3 style="color: #e74c3c; margin: 0;">Super Admins</h3>
+            <p style="font-size: 2rem; font-weight: bold; margin: 0.5rem 0 0 0;"><%= stats.superAdmins %></p>
+        </div>
+        <div class="card" style="text-align: center; padding: 1.5rem;">
+            <h3 style="color: #9b59b6; margin: 0;">Admins</h3>
+            <p style="font-size: 2rem; font-weight: bold; margin: 0.5rem 0 0 0;"><%= stats.admins %></p>
+        </div>
+        <div class="card" style="text-align: center; padding: 1.5rem;">
+            <h3 style="color: #f39c12; margin: 0;">Managers</h3>
+            <p style="font-size: 2rem; font-weight: bold; margin: 0.5rem 0 0 0;"><%= stats.managers %></p>
+        </div>
+        <div class="card" style="text-align: center; padding: 1.5rem;">
+            <h3 style="color: #27ae60; margin: 0;">Customers</h3>
+            <p style="font-size: 2rem; font-weight: bold; margin: 0.5rem 0 0 0;"><%= stats.customers %></p>
+        </div>
+    </div>
+
+    <!-- User Management Table -->
+    <div class="card">
+        <h2 style="margin-bottom: 1rem;">User Management</h2>
+        <p style="color: #7f8c8d; margin-bottom: 1.5rem;">
+            <% if (user.role === 'super admin') { %>
+                As Super Admin, you can change user roles to grant or revoke admin permissions.
+            <% } else { %>
+                You can view all users but only Super Admin can change roles.
+            <% } %>
+        </p>
+
+        <% if (users.length === 0) { %>
+            <p style="text-align: center; padding: 2rem; color: #7f8c8d;">No users found.</p>
+        <% } else { %>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #ecf0f1; border-bottom: 2px solid #bdc3c7;">
+                        <th style="padding: 1rem; text-align: left;">Name</th>
+                        <th style="padding: 1rem; text-align: left;">Email</th>
+                        <th style="padding: 1rem; text-align: left;">Current Role</th>
+                        <% if (user.role === 'super admin') { %>
+                            <th style="padding: 1rem; text-align: left;">Actions</th>
+                        <% } %>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% users.forEach(u => { %>
+                        <tr style="border-bottom: 1px solid #ecf0f1;">
+                            <td style="padding: 1rem;"><%= u.name %></td>
+                            <td style="padding: 1rem;"><%= u.email %></td>
+                            <td style="padding: 1rem;">
+                                <span style="padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.9rem; font-weight: 500; 
+                                    background: <%= u.role === 'super admin' ? '#e74c3c' : u.role === 'admin' ? '#9b59b6' : u.role === 'manager' ? '#f39c12' : '#27ae60' %>; 
+                                    color: white;">
+                                    <%= u.role.toUpperCase() %>
+                                </span>
+                            </td>
+                            <% if (user.role === 'super admin') { %>
+                                <td style="padding: 1rem;">
+                                    <% if (u._id.toString() !== user._id.toString() && u.role !== 'super admin') { %>
+                                        <form action="/admin/grant-role" method="POST" style="display: flex; gap: 0.5rem; align-items: center;">
+                                            <input type="hidden" name="userId" value="<%= u._id %>">
+                                            <select name="role" style="padding: 0.5rem; border: 1px solid #bdc3c7; border-radius: 4px;">
+                                                <option value="customer" <%= u.role === 'customer' ? 'selected' : '' %>>Customer</option>
+                                                <option value="manager" <%= u.role === 'manager' ? 'selected' : '' %>>Manager</option>
+                                                <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Update</button>
+                                        </form>
+                                    <% } else if (u._id.toString() === user._id.toString()) { %>
+                                        <span style="color: #7f8c8d; font-style: italic;">You</span>
+                                    <% } else { %>
+                                        <span style="color: #7f8c8d; font-style: italic;">Protected</span>
+                                    <% } %>
+                                </td>
+                            <% } %>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } %>
+    </div>
+
+    <div style="margin-top: 2rem; text-align: center;">
+        <a href="/products" class="btn" style="background: #95a5a6; color: white;">Go to Products</a>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

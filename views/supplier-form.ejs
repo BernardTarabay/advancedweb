@@ -1,0 +1,40 @@
+<%- include('partials/header', {title: isEdit ? 'Edit Supplier' : 'New Supplier', user}) %>
+
+<div class="container">
+    <div class="card" style="max-width: 600px; margin: 2rem auto;">
+        <h2 style="margin-bottom: 1.5rem;"><%= isEdit ? 'Edit Supplier' : 'Create New Supplier' %></h2>
+        
+        <% if (locals.error) { %>
+            <div class="error"><%= error %></div>
+        <% } %>
+        
+        <form action="<%= isEdit ? '/suppliers/' + supplier._id + '/update' : '/suppliers/create' %>" method="POST">
+            <div class="form-group">
+                <label for="name">Supplier Name *</label>
+                <input type="text" id="name" name="name" value="<%= isEdit ? supplier.name : '' %>" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" name="email" value="<%= isEdit ? supplier.email : '' %>" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" name="phone" value="<%= isEdit ? (supplier.phone || '') : '' %>">
+            </div>
+            
+            <div class="form-group">
+                <label for="address">Address</label>
+                <textarea id="address" name="address" rows="3"><%= isEdit ? (supplier.address || '') : '' %></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;"><%= isEdit ? 'Update' : 'Create' %></button>
+                <a href="/suppliers" class="btn" style="flex: 1; text-align: center; background: #95a5a6; color: white;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

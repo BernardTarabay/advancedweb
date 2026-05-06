@@ -1,0 +1,69 @@
+<%- include('partials/header', {title: 'Users', user}) %>
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h2>Users</h2>
+        <% if (user.role === 'admin' || user.role === 'super admin') { %>
+            <a href="/users/new" class="btn btn-primary">Add User</a>
+        <% } %>
+    </div>
+    
+    <% if (locals.success) { %>
+        <div class="success"><%= success %></div>
+    <% } %>
+    
+    <% if (users.length === 0) { %>
+        <div class="card">
+            <p>No users found.</p>
+        </div>
+    <% } else { %>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach(u => { %>
+                    <tr>
+                        <td><%= u.name %></td>
+                        <td><%= u.email %></td>
+                        <td>
+                            <span style="
+                                padding: 0.25rem 0.5rem; 
+                                border-radius: 4px; 
+                                font-size: 0.875rem;
+                                background: <%= u.role === 'super admin' ? '#c0392b' :
+                                              u.role === 'admin' ? '#9b59b6' : 
+                                              u.role === 'manager' ? '#3498db' : '#27ae60' %>;
+                                color: white;
+                            ">
+                                <%= u.role.charAt(0).toUpperCase() + u.role.slice(1) %>
+                            </span>
+                        </td>
+                        <td><%= new Date(u.createdAt).toLocaleDateString() %></td>
+                        <td>
+                            <div class="actions">
+                                <a href="/users/<%= u._id %>" class="btn btn-primary">View</a>
+                                <% if (user.role === 'admin' || user.role === 'super admin') { %>
+                                    <a href="/users/<%= u._id %>/edit" class="btn btn-success">Edit</a>
+                                    <% if (u._id.toString() !== user._id.toString() && u.role !== 'super admin') { %>
+                                        <form action="/users/<%= u._id %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure?');">
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
+                                    <% } %>
+                                <% } %>
+                            </div>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>

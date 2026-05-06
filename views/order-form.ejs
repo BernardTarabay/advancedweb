@@ -1,0 +1,131 @@
+<%- include('partials/header', {title: 'Create Order', user}) %>
+
+<div class="container">
+    <div class="card" style="max-width: 800px; margin: 2rem auto;">
+        <h2 style="margin-bottom: 1.5rem;">Create New Order</h2>
+        
+        <% if (locals.error) { %>
+            <div class="error"><%= error %></div>
+        <% } %>
+        
+        <form action="/orders/create" method="POST" id="orderForm">
+            <div id="orderItems">
+                <div class="order-item" style="border: 1px solid #ddd; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;">
+                    <h4 style="margin-bottom: 1rem;">Item 1</h4>
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>Product *</label>
+                            <select name="items[0][product]" required onchange="updatePrice(this, 0)">
+                                <option value="">Select a product</option>
+                                <% products.forEach(product => { %>
+                                    <option value="<%= product._id %>" data-price="<%= product.price %>" data-stock="<%= product.quantity %>">
+                                        <%= product.name %> ($<%= product.price.toFixed(2) %>) - Stock: <%= product.quantity %>
+                                    </option>
+                                <% }); %>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Quantity *</label>
+                            <input type="number" name="items[0][quantity]" min="1" value="1" required onchange="updateSubtotal(0)">
+                        </div>
+                    </div>
+                    <div style="margin-top: 0.5rem;">
+                        <strong>Subtotal: $<span id="subtotal-0">0.00</span></strong>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="button" onclick="addItem()" class="btn btn-success" style="margin-bottom: 1rem;">Add Another Item</button>
+            
+            <div style="background: #ecf0f1; padding: 1rem; border-radius: 4px; margin: 1rem 0;">
+                <h3 style="margin-bottom: 0.5rem;">Total: $<span id="totalAmount">0.00</span></h3>
+            </div>
+            
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Create Order</button>
+                <a href="/orders" class="btn" style="flex: 1; text-align: center; background: #95a5a6; color: white;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let itemCount = 1;
+
+function updatePrice(select, index) {
+    const option = select.options[select.selectedIndex];
+    updateSubtotal(index);
+}
+
+function updateSubtotal(index) {
+    const select = document.querySelector(`select[name="items[${index}][product]"]`);
+    const qtyInput = document.querySelector(`input[name="items[${index}][quantity]"]`);
+    const subtotalSpan = document.getElementById(`subtotal-${index}`);
+    
+    const option = select.options[select.selectedIndex];
+    const price = parseFloat(option.getAttribute('data-price')) || 0;
+    const qty = parseInt(qtyInput.value) || 0;
+    const stock = parseInt(option.getAttribute('data-stock')) || 0;
+    
+    if (qty > stock) {
+        alert(`Only ${stock} units available for this product.`);
+        qtyInput.value = stock;
+    }
+    
+    const subtotal = price * qty;
+    subtotalSpan.textContent = subtotal.toFixed(2);
+    
+    updateTotal();
+}
+
+function updateTotal() {
+    let total = 0;
+    for (let i = 0; i < itemCount; i++) {
+        const subtotalSpan = document.getElementById(`subtotal-${i}`);
+        if (subtotalSpan) {
+            total += parseFloat(subtotalSpan.textContent) || 0;
+        }
+    }
+    document.getElementById('totalAmount').textContent = total.toFixed(2);
+}
+
+function addItem() {
+    const itemsContainer = document.getElementById('orderItems');
+    const newItem = document.createElement('div');
+    newItem.className = 'order-item';
+    newItem.style.cssText = 'border: 1px solid #ddd; padding: 1rem; border-radius: 4px; margin-bottom: 1rem; position: relative;';
+    newItem.innerHTML = `
+        <button type="button" onclick="removeItem(this)" style="position: absolute; top: 0.5rem; right: 0.5rem; background: #e74c3c; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer;">Remove</button>
+        <h4 style="margin-bottom: 1rem;">Item ${itemCount + 1}</h4>
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label>Product *</label>
+                <select name="items[${itemCount}][product]" required onchange="updatePrice(this, ${itemCount})">
+                    <option value="">Select a product</option>
+                    <% products.forEach(product => { %>
+                        <option value="<%= product._id %>" data-price="<%= product.price %>" data-stock="<%= product.quantity %>">
+                            <%= product.name %> ($<%= product.price.toFixed(2) %>) - Stock: <%= product.quantity %>
+                        </option>
+                    <% }); %>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Quantity *</label>
+                <input type="number" name="items[${itemCount}][quantity]" min="1" value="1" required onchange="updateSubtotal(${itemCount})">
+            </div>
+        </div>
+        <div style="margin-top: 0.5rem;">
+            <strong>Subtotal: $<span id="subtotal-${itemCount}">0.00</span></strong>
+        </div>
+    `;
+    itemsContainer.appendChild(newItem);
+    itemCount++;
+}
+
+function removeItem(button) {
+    button.parentElement.remove();
+    updateTotal();
+}
+</script>
+
+<%- include('partials/footer') %>

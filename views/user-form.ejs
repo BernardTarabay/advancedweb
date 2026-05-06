@@ -1,0 +1,68 @@
+<%- include('partials/header', {title: isEdit ? 'Edit User' : 'New User', user: user}) %>
+
+<div class="container">
+    <div class="card" style="max-width: 600px; margin: 2rem auto;">
+        <h2 style="margin-bottom: 1.5rem;"><%= isEdit ? 'Edit User' : 'Create New User' %></h2>
+        
+        <% if (locals.error) { %>
+            <div class="error"><%= error %></div>
+        <% } %>
+        
+        <form action="<%= isEdit ? '/users/' + editUser._id + '/update' : '/users/create' %>" method="POST">
+            <div class="form-group">
+                <label for="name">Name *</label>
+                <input type="text" id="name" name="name" value="<%= isEdit ? editUser.name : '' %>" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" name="email" value="<%= isEdit ? editUser.email : '' %>" required>
+            </div>
+            
+            <% if (!isEdit) { %>
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+            <% } %>
+            
+            <div class="form-group">
+                <label for="role">Role *</label>
+                <% if (locals.roleLocked) { %>
+                    <p style="padding: 0.75rem; background: #ecf0f1; border-radius: 4px;">
+                        <%= editUser.role.charAt(0).toUpperCase() + editUser.role.slice(1) %>
+                        <span style="color: #7f8c8d; font-size: 0.9rem;"> (only Super Admin can change this role)</span>
+                    </p>
+                <% } else if (user.role === 'super admin') { %>
+                    <select id="role" name="role" required>
+                        <option value="customer" <%= isEdit && editUser.role === 'customer' ? 'selected' : '' %>>Customer</option>
+                        <option value="manager" <%= isEdit && editUser.role === 'manager' ? 'selected' : '' %>>Manager</option>
+                        <option value="admin" <%= isEdit && editUser.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                    </select>
+                <% } else { %>
+                    <select id="role" name="role" required>
+                        <option value="customer" <%= isEdit && editUser.role === 'customer' ? 'selected' : '' %>>Customer</option>
+                        <option value="manager" <%= isEdit && editUser.role === 'manager' ? 'selected' : '' %>>Manager</option>
+                    </select>
+                <% } %>
+            </div>
+            
+            <% if (isEdit) { %>
+                <p style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 1rem;">
+                    Note: Leave password fields empty to keep the current password.
+                </p>
+                <div class="form-group">
+                    <label for="password">New Password (optional)</label>
+                    <input type="password" id="password" name="password">
+                </div>
+            <% } %>
+            
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;"><%= isEdit ? 'Update' : 'Create' %></button>
+                <a href="/users" class="btn" style="flex: 1; text-align: center; background: #95a5a6; color: white;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,95 @@
+<%- include('partials/header', {title: 'Order Details', user}) %>
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h2>Order #<%= order._id.toString().slice(-6) %></h2>
+        <div>
+            <a href="/orders" class="btn btn-primary">Back to Orders</a>
+            <% if ((user.role === 'admin' || user.role === 'super admin') && order.status !== 'delivered' && order.status !== 'cancelled') { %>
+                <a href="/orders/<%= order._id %>/edit" class="btn btn-success">Update Status</a>
+            <% } %>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h3 style="margin-bottom: 1rem;">Order Information</h3>
+        <table style="box-shadow: none;">
+            <tr>
+                <th style="width: 200px;">Order ID</th>
+                <td>#<%= order._id %></td>
+            </tr>
+            <tr>
+                <th>Customer</th>
+                <td><%= order.user ? order.user.name + ' (' + order.user.email + ')' : 'N/A' %></td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td>
+                    <span style="
+                        padding: 0.25rem 0.5rem; 
+                        border-radius: 4px;
+                        background: <%= order.status === 'delivered' ? '#27ae60' : 
+                                      order.status === 'cancelled' ? '#e74c3c' : 
+                                      order.status === 'shipped' ? '#3498db' : 
+                                      order.status === 'processing' ? '#f39c12' : '#95a5a6' %>;
+                        color: white;
+                    ">
+                        <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <th>Total Amount</th>
+                <td style="font-size: 1.25rem; font-weight: bold;">$<%= order.totalAmount.toFixed(2) %></td>
+            </tr>
+            <tr>
+                <th>Order Date</th>
+                <td><%= new Date(order.createdAt).toLocaleString() %></td>
+            </tr>
+            <tr>
+                <th>Last Updated</th>
+                <td><%= new Date(order.updatedAt).toLocaleString() %></td>
+            </tr>
+        </table>
+    </div>
+    
+    <% if (order.items && order.items.length > 0) { %>
+        <div class="card">
+            <h3 style="margin-bottom: 1rem;">Order Items</h3>
+            <table style="box-shadow: none;">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price at Order</th>
+                        <th>Quantity</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% order.items.forEach(item => { %>
+                        <tr>
+                            <td>
+                                <% if (item.product) { %>
+                                    <a href="/products/<%= item.product._id %>"><%= item.product.name %></a>
+                                <% } else { %>
+                                    N/A
+                                <% } %>
+                            </td>
+                            <td>$<%= item.priceAtOrder.toFixed(2) %></td>
+                            <td><%= item.quantity %></td>
+                            <td>$<%= (item.priceAtOrder * item.quantity).toFixed(2) %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight: bold; border-top: 2px solid #34495e;">
+                        <td colspan="3" style="text-align: right;">Total:</td>
+                        <td>$<%= order.totalAmount.toFixed(2) %></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>
