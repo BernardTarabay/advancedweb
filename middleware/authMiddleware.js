@@ -43,7 +43,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
  */
 exports.loginLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 100, // 100 attempts per IP
+  max: 1000, // 100 attempts per IP
   message: {
     message: 'Too many login attempts. Try again later.'
   },
