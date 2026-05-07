@@ -105,6 +105,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
   let totalAmount = 0;
   const orderItems = [];
 
+  // Validate all items before creating the order
   for (const item of items) {
     const quantity = parseInt(item.quantity, 10);
     if (!item.product || !Number.isFinite(quantity) || quantity <= 0) {
@@ -136,25 +137,38 @@ exports.createOrder = asyncHandler(async (req, res) => {
       });
     }
 
+    totalAmount += product.price * quantity;
+  }
+
+  // Create the order after validation
+  const order = await Order.create({
+    user: userId,
+    items: [], // Temporary, will be updated later
+    totalAmount: 0, // Temporary, will be updated later
+    status: 'pending'
+  });
+
+  for (const item of items) {
+    const product = await Product.findById(item.product);
+    const quantity = parseInt(item.quantity, 10);
+
     const orderItem = await OrderItem.create({
+      order: order._id, // Associate with the created order
       product: product._id,
       quantity,
       priceAtOrder: product.price
     });
 
     orderItems.push(orderItem._id);
-    totalAmount += product.price * quantity;
 
     product.quantity -= quantity;
     await product.save();
   }
 
-  const order = await Order.create({
-    user: userId,
-    items: orderItems,
-    totalAmount,
-    status: 'pending'
-  });
+  // Update the order with the correct items and total amount
+  order.items = orderItems;
+  order.totalAmount = totalAmount;
+  await order.save();
 
   res.redirect('/orders/' + order._id);
 });

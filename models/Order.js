@@ -12,7 +12,6 @@ const orderSchema = new mongoose.Schema({
   items: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'OrderItem',
-    required: true
   }],
 
   status: {
@@ -27,6 +26,11 @@ const orderSchema = new mongoose.Schema({
     min: 0
   }
 }, { timestamps: true });
+
+// Add custom validation to ensure items array is not empty
+orderSchema.path('items').validate(function (value) {
+  return value && value.length > 0;
+}, 'Order must have at least one item.');
 
 orderSchema.index({ createdAt: -1 });
 orderSchema.index({ status: 1 });

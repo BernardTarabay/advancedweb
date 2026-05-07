@@ -46,10 +46,16 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 
 async function start() {
-  await connectDB();
-  await ensureSuperAdmin();
+  try {
+    await connectDB();
+    console.log("MongoDB connected");
+    await ensureSuperAdmin();
+  } catch (err) {
+    console.error("MongoDB connection failed, but server will still start:", err.message);
+  }
+
   app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
   });
 }
 
